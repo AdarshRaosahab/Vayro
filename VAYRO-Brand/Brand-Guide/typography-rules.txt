@@ -1,0 +1,16 @@
+# VAYRO Typography Rules
+
+## Fonts
+- **Headings**: Montserrat
+- **Body**: Open Sans
+
+## Scale
+- **H1**: 48px (Bold)
+- **H2**: 32px (Bold)
+- **H3**: 24px (Semi-Bold)
+- **Body**: 16px (Regular)
+- **Small**: 14px (Regular)
+
+## Usage
+- Use Montserrat for all headings and major UI elements (buttons, nav).
+- Use Open Sans for long-form text and data tables.

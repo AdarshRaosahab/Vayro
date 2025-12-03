@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  password         String    // Hashed password
+  displayName      String?
+  website          String?
+  plan             String    @default("free") // free, premium
+  role             String    @default("USER") // USER, ADMIN
+  onboardCompleted Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  status           String    @default("ACTIVE") // ACTIVE, SUSPENDED
+  links            Link[]
+  sessions         Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Link {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  target      String
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id])
+  createdAt   DateTime     @default(now())
+  clickEvents ClickEvent[]
+  status      String       @default("ACTIVE") // ACTIVE, BANNED
+  reports     Int          @default(0)
+  abuseReports AbuseReport[]
+  note        String?      // Private note for the user
+}
+
+model AbuseReport {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id])
+  reason    String
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model ClickEvent {
+  id        String   @id @default(cuid())
+  linkId    String
+  link      Link     @relation(fields: [linkId], references: [id])
+  country   String?
+  device    String?
+  browser   String?
+  ipHash    String?
+  userAgent String?
+  referrer  String?
+  locale    String?
+  createdAt DateTime @default(now())
+
+  @@index([linkId, createdAt])
+}

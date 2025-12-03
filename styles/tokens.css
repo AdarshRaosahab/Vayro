@@ -1,0 +1,89 @@
+:root {
+    /* Colors - VAYRO Palette */
+    --color-ivory-50: #FDFCF8;
+    --color-ivory-100: #F9F6F0;
+    --color-ivory-200: #F0EAD6;
+    --color-ivory-300: #E6DCC0;
+
+    --color-navy-50: #F0F4F8;
+    --color-navy-100: #D9E2EC;
+    --color-navy-500: #486581;
+    --color-navy-700: #334E68;
+    --color-navy-800: #243B53;
+    --color-navy-900: #102A43;
+    /* Deep Navy */
+
+    --color-gold-100: #FBF5E6;
+    --color-gold-300: #E8D097;
+    --color-gold-400: #D7B56D;
+    --color-gold-500: #C59C45;
+    /* VAYRO Gold */
+    --color-gold-600: #A88332;
+
+    --color-slate-50: #F8FAFC;
+    --color-slate-100: #F1F5F9;
+    --color-slate-200: #E2E8F0;
+    --color-slate-300: #CBD5E1;
+    --color-slate-400: #94A3B8;
+    --color-slate-500: #64748B;
+    --color-slate-600: #475569;
+    --color-slate-700: #334155;
+    --color-slate-800: #1E293B;
+    --color-slate-900: #0F172A;
+
+    /* Typography Scale */
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
+    --font-size-3xl: 2rem;
+    /* 32px */
+    --font-size-4xl: 3rem;
+    /* 48px */
+
+    /* Spacing Grid (8pt) */
+    --space-xs: 0.25rem;
+    /* 4px */
+    --space-sm: 0.5rem;
+    /* 8px */
+    --space-md: 1rem;
+    /* 16px */
+    --space-lg: 1.5rem;
+    /* 24px */
+    --space-xl: 2rem;
+    /* 32px */
+    --space-2xl: 3rem;
+    /* 48px */
+    --space-3xl: 4rem;
+    /* 64px */
+
+    /* Focus Ring */
+    --focus-ring-color: rgba(215, 181, 109, 0.5);
+    --focus-ring-width: 3px;
+    --focus-ring-offset: 2px;
+}
+
+/* Dark Mode (Future Proofing) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Override tokens here if we implement dark mode later */
+    }
+}
+
+/* Accessibility: Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

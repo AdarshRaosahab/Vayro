@@ -1,0 +1,17 @@
+# VAYRO Spacing System
+
+## Grid
+We use an 8pt grid system.
+
+## Spacing Tokens
+- **xs**: 4px
+- **sm**: 8px
+- **md**: 16px
+- **lg**: 24px
+- **xl**: 40px
+- **2xl**: 72px
+
+## Components
+- **Buttons**: 14px vertical, 24px horizontal padding.
+- **Cards**: 24px padding.
+- **Inputs**: 12px vertical, 16px horizontal padding.

@@ -1,0 +1,36 @@
+{
+    "name": "vayro",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "perf:test": "node scripts/perf-test.js",
+        "release:check": "node scripts/release-check.js"
+    },
+    "dependencies": {
+        "bcryptjs": "latest",
+        "cookie": "latest",
+        "next": "latest",
+        "react": "latest",
+        "react-dom": "latest",
+        "razorpay": "latest",
+        "qrcode": "latest",
+        "recharts": "latest",
+        "@prisma/client": "^5.10.0"
+    },
+    "devDependencies": {
+        "@types/node": "latest",
+        "@types/react": "latest",
+        "@types/react-dom": "latest",
+        "@types/qrcode": "latest",
+        "@types/recharts": "latest",
+        "autoprefixer": "latest",
+        "postcss": "latest",
+        "prisma": "^5.10.0",
+        "tailwindcss": "^3.4.1",
+        "typescript": "latest"
+    }
+}

@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* Ivory */
+        --color-ivory-50: #fcfbf9;
+        --color-ivory-100: #f7f5f2;
+        --color-ivory-200: #efebe5;
+        --color-ivory-300: #e6e0d8;
+
+        /* Navy */
+        --color-navy-50: #f0f4f8;
+        --color-navy-100: #d9e2ec;
+        --color-navy-500: #486581;
+        --color-navy-700: #243b53;
+        --color-navy-800: #102a43;
+        --color-navy-900: #0a192f;
+        /* Deep Navy */
+
+        /* Gold */
+        --color-gold-100: #fff9db;
+        --color-gold-300: #ffec99;
+        --color-gold-400: #ffda6a;
+        --color-gold-500: #d4af37;
+        /* Metallic Gold */
+        --color-gold-600: #a68a2e;
+
+        /* Slate */
+        --color-slate-50: #f8fafc;
+        --color-slate-100: #f1f5f9;
+        --color-slate-200: #e2e8f0;
+        --color-slate-300: #cbd5e1;
+        --color-slate-400: #94a3b8;
+        --color-slate-500: #64748b;
+        /* Slate Gray */
+        --color-slate-600: #475569;
+        --color-slate-700: #334155;
+        --color-slate-800: #1e293b;
+        --color-slate-900: #0f172a;
+
+        /* Spacing */
+        --space-xs: 0.5rem;
+        --space-sm: 0.75rem;
+        --space-md: 1rem;
+        --space-lg: 1.5rem;
+        --space-xl: 2rem;
+        --space-2xl: 3rem;
+        --space-3xl: 4rem;
+    }
+
+    body {
+        @apply bg-ivory-50 text-navy-900 font-sans;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply font-heading;
+    }
+}

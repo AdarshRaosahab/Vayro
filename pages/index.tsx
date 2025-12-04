@@ -39,7 +39,8 @@ export default function Home() {
             })
             const data = await res.json()
             if (data.ok) {
-                setShortUrl(data.shortUrl)
+                const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+                setShortUrl(`${origin}${data.shortUrl}`)
             } else {
                 setError(data.error || 'Something went wrong')
             }

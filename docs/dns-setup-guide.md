@@ -13,11 +13,25 @@ Since you want your site to be accessible at **vayro.in** (instead of `vayro.ver
 
 Vercel will show you a configuration error because you haven't pointed your domain to them yet. You have two options:
 
-### Option A: Nameservers (Easiest)
-This gives Vercel full control over your DNS.
-1.  Log in to where you bought your domain (GoDaddy, Namecheap, Hostinger, etc.).
+### Option A: Nameservers (Easiest & Recommended for Hostinger)
+This gives Vercel full control over your DNS and is the simplest setup.
+
+**Hostinger Specific Steps:**
+1.  Log in to your **Hostinger Dashboard**.
+2.  Click on **Domains** in the top menu.
+3.  Click **Manage** next to `vayro.in`.
+4.  Look for **"Nameservers"** in the left sidebar (or scroll down to find it).
+5.  Click **Change**.
+6.  Select **"Change nameservers"** (not "Use Hostinger nameservers").
+7.  Enter Vercel's nameservers:
+    *   Nameserver 1: `ns1.vercel-dns.com`
+    *   Nameserver 2: `ns2.vercel-dns.com`
+8.  Click **Save**.
+
+**General Steps (Other Registrars):**
+1.  Log in to your registrar.
 2.  Find the **"Nameservers"** section.
-3.  Change them to Vercel's nameservers:
+3.  Change them to:
     *   `ns1.vercel-dns.com`
     *   `ns2.vercel-dns.com`
 

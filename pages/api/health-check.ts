@@ -24,6 +24,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 hasDatabaseUrl: hasDbUrl,
                 isPostgres: isPostgres,
                 nodeEnv: process.env.NODE_ENV,
+                vercelEnv: process.env.VERCEL_ENV || 'unknown',
+                allKeys: Object.keys(process.env).filter(k => !k.includes('SECRET') && !k.includes('KEY') && !k.includes('PASSWORD')), // List keys for debugging, excluding secrets
             },
             database: {
                 status: dbStatus,

@@ -43,12 +43,11 @@ export default function Checkout() {
                 body: JSON.stringify({ amount: amount }),
             })
 
+            const text = await res.text()
             let data
             try {
-                data = await res.json()
+                data = JSON.parse(text)
             } catch (e) {
-                // If API returns HTML (500/404), json() fails
-                const text = await res.text()
                 console.error('API Error (Non-JSON):', text)
                 throw new Error(`Server Error: ${res.status} ${res.statusText}. Response: ${text.substring(0, 100)}`)
             }

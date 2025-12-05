@@ -37,7 +37,7 @@ export default function Checkout() {
         setLoading(true)
         try {
             // Create Order
-            const res = await fetch('/api/payments/create-order', {
+            const res = await fetch('/api/secure-pay', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: amount }),

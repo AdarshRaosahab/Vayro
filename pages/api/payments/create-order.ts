@@ -4,8 +4,9 @@ import { getSession } from '../../../lib/sessions'
 import { AuthError, AppError } from '../../../lib/errors'
 
 export default apiHandler(async (req, res) => {
+    console.log(`[CreateOrder] Method: ${req.method}`)
     if (req.method !== 'POST') {
-        throw new AppError('Method not allowed', 405)
+        throw new AppError(`Method not allowed. Received: ${req.method}`, 405)
     }
 
     const { amount, currency = 'INR' } = req.body

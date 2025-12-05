@@ -9,7 +9,7 @@ interface AdSlotProps {
 
 export default function AdSlot({ slotId, responsive = true, className = '', style }: AdSlotProps) {
     const [showAds, setShowAds] = useState<boolean | null>(null)
-    const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID
+    const clientId = "ca-pub-6145288296775657"
 
     useEffect(() => {
         // Check if we should show ads

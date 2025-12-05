@@ -5,6 +5,13 @@ import { AuthError, AppError } from '../../../lib/errors'
 
 export default apiHandler(async (req, res) => {
     console.log(`[CreateOrder] Method: ${req.method}`)
+
+    // Handle Preflight logic
+    if (req.method === 'OPTIONS') {
+        res.status(200).end()
+        return
+    }
+
     if (req.method !== 'POST') {
         throw new AppError(`Method not allowed. Received: ${req.method}`, 405)
     }

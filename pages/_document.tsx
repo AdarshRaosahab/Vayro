@@ -8,13 +8,12 @@ export default function Document() {
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
                 <link rel="icon" href="/logo.png" />
-                {process.env.ADSENSE_CLIENT_ID && (
-                    <script
-                        async
-                        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.ADSENSE_CLIENT_ID}`}
-                        crossOrigin="anonymous"
-                    />
-                )}
+                <meta name="google-adsense-account" content="ca-pub-6145288296775657" />
+                <script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6145288296775657"
+                    crossOrigin="anonymous"
+                />
             </Head>
             <body className="bg-ivory text-deepNavy font-sans">
                 <Main />

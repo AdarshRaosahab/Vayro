@@ -94,13 +94,13 @@ export default function Home() {
                         {shortUrl && (
                             <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
                                 <p className="text-sm text-slateGray mb-2">Your short link:</p>
-                                <div className="flex items-center justify-center space-x-4">
-                                    <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="text-2xl font-bold text-deepNavy hover:text-gold transition-colors">
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                                    <a href={shortUrl} target="_blank" rel="noopener noreferrer" className="text-xl sm:text-2xl font-bold text-deepNavy hover:text-gold transition-colors break-all text-center">
                                         {shortUrl}
                                     </a>
                                     <button
                                         onClick={() => navigator.clipboard.writeText(shortUrl)}
-                                        className="text-sm text-gold font-bold hover:underline"
+                                        className="text-sm text-gold font-bold hover:underline whitespace-nowrap"
                                     >
                                         Copy
                                     </button>

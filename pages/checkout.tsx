@@ -37,8 +37,7 @@ export default function Checkout() {
         setLoading(true)
         try {
             // Create Order
-            // TESING: Switching to test-payment endpoint to debug 405
-            const res = await fetch('/api/test-payment', {
+            const res = await fetch('/api/payments/create-order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: amount }),

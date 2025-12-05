@@ -14,7 +14,7 @@ export default function Layout({ children, title = 'VAYRO', hideFooter = false }
     return (
         <div className="min-h-screen flex flex-col bg-ivory text-deepNavy font-sans">
             <Head>
-                <title>{title}</title>
+                <title>{title === 'VAYRO' ? title : `${title} | VAYRO`}</title>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
             </Head>

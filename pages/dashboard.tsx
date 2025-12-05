@@ -11,6 +11,37 @@ import ConfirmDeleteModal from '../components/ConfirmDeleteModal'
 import PremiumBadge from '../components/PremiumBadge'
 import UpsellCard from '../components/UpsellCard'
 
+const CopyableLink = ({ code }: { code: string }) => {
+    const [copied, setCopied] = useState(false)
+    // Use window.location.origin if available, otherwise relative
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const fullLink = `${origin}/${code}`
+
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        navigator.clipboard.writeText(fullLink)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <div className="flex items-center space-x-2 group">
+            <span className="font-semibold text-deepNavy group-hover:text-gold transition-colors">/{code}</span>
+            <button
+                onClick={handleCopy}
+                className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-deepNavy transition-colors focus:outline-none"
+                title="Copy Link"
+            >
+                {copied ? (
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                )}
+            </button>
+        </div>
+    )
+}
+
 export default function Dashboard() {
     const [links, setLinks] = useState<any[]>([])
     const [selectedLink, setSelectedLink] = useState<any>(null)
@@ -104,18 +135,28 @@ export default function Dashboard() {
                                 data={links}
                                 columns={[
                                     {
-                                        header: 'Short Link',
+                                        header: 'Original Link',
                                         accessor: (link: any) => (
-                                            <div className="font-semibold text-deepNavy cursor-pointer hover:text-gold transition-colors" onClick={() => setSelectedLink(link)}>
-                                                /{link.code}
+                                            <div className="flex items-center max-w-[200px]" title={link.target}>
+                                                <div className="truncate text-slateGray text-sm">
+                                                    {link.target}
+                                                </div>
+                                                <a
+                                                    href={link.target}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="ml-2 text-slate-300 hover:text-deepNavy flex-shrink-0"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                </a>
                                             </div>
                                         ),
                                     },
                                     {
-                                        header: 'Target',
+                                        header: 'Short Link',
                                         accessor: (link: any) => (
-                                            <div className="truncate max-w-[150px] text-slateGray" title={link.target}>
-                                                {link.target}
+                                            <div className="cursor-pointer" onClick={() => setSelectedLink(link)}>
+                                                <CopyableLink code={link.code} />
                                             </div>
                                         ),
                                     },

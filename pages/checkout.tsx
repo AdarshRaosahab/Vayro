@@ -48,7 +48,9 @@ export default function Checkout() {
                 data = await res.json()
             } catch (e) {
                 // If API returns HTML (500/404), json() fails
-                throw new Error(`Server Error: ${res.status} ${res.statusText}`)
+                const text = await res.text()
+                console.error('API Error (Non-JSON):', text)
+                throw new Error(`Server Error: ${res.status} ${res.statusText}. Response: ${text.substring(0, 100)}`)
             }
 
             if (!data.ok) {

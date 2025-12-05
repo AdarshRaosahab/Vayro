@@ -34,7 +34,8 @@ export default function Login() {
             const data = await res.json()
 
             if (data.ok) {
-                window.location.href = '/dashboard'
+                const next = router.query.next as string
+                window.location.href = next || '/dashboard'
             } else {
                 alert(data.message || 'Login failed')
             }

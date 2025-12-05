@@ -17,6 +17,17 @@ export default function Checkout() {
     const [amount, setAmount] = useState(299)
 
     useEffect(() => {
+        // Check if user is logged in
+        fetch('/api/auth/me')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.ok) {
+                    // Not logged in, redirect to login
+                    router.push('/login?next=/checkout')
+                }
+            })
+            .catch(() => { })
+
         if (router.isReady && router.query.test === 'true') {
             setAmount(1)
         }
@@ -34,7 +45,11 @@ export default function Checkout() {
             const data = await res.json()
 
             if (!data.ok) {
-                alert('Failed to create order')
+                if (res.status === 401) {
+                    router.push('/login?next=/checkout')
+                    return
+                }
+                alert(data.message || 'Failed to create order')
                 setLoading(false)
                 return
             }

@@ -26,7 +26,14 @@ export default apiHandler(async (req, res) => {
     const session = await getSession(sessionId)
     if (!session) throw new AuthError()
 
-    const order = await createOrder(amount, currency)
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        throw new AppError('Razorpay Server Keys Missing', 500)
+    }
 
-    res.status(200).json({ ok: true, order })
+    try {
+        const order = await createOrder(amount, currency)
+        res.status(200).json({ ok: true, order })
+    } catch (err: any) {
+        throw new AppError(err.message || 'Razorpay Order Creation Failed', 500)
+    }
 })

@@ -14,6 +14,8 @@
         "@prisma/client": "^5.10.0",
         "bcryptjs": "latest",
         "cookie": "latest",
+        "google-auth-library": "^10.5.0",
+        "google-spreadsheet": "^5.0.2",
         "next": "^16.0.7",
         "qrcode": "latest",
         "razorpay": "latest",

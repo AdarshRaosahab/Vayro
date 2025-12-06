@@ -37,7 +37,7 @@ export default apiHandler(async (req, res) => {
         throw new AppError('Too many codes (max 50)', 400)
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vayro.in'
 
     const results = await Promise.all(
         codes.map(async (code) => {

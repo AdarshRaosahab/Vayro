@@ -145,9 +145,14 @@ export default function Checkout() {
                     <ButtonPrimary onClick={handlePayment} className="w-full" disabled={loading}>
                         {loading ? 'Processing...' : 'Pay with Razorpay'}
                     </ButtonPrimary>
-                    <p className="text-xs text-slateGray mt-4">
-                        Secured by Razorpay. Supports UPI, Cards, Netbanking.
-                    </p>
+                    <div className="mt-6 text-xs text-slateGray space-y-2">
+                        <p>
+                            Secured by Razorpay. Supports UPI, Cards, Netbanking.
+                        </p>
+                        <p className="italic bg-slate-50 p-2 rounded border border-slate-100">
+                            <strong>Note:</strong> Sometimes the payment gateway may display the founder's name "Adarsh Yadav" instead of Vayro. This is normal and verified.
+                        </p>
+                    </div>
                 </Card>
             </div>
         </Layout>

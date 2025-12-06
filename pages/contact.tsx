@@ -12,12 +12,14 @@ export default function Contact() {
                         <p className="font-semibold">Email:</p>
                         <p className="text-deepNavy mb-4">
                             <a href="mailto:support@vayro.in" className="text-gold hover:underline">support@vayro.in</a>
+                            <br />
+                            <span className="text-sm text-slateGray">Founder: <a href="mailto:adarshyadav8368@zohomail.in" className="hover:underline">adarshyadav8368@zohomail.in</a></span>
                         </p>
 
                         <p className="font-semibold">Address:</p>
                         <p className="text-deepNavy">
-                            House No. 89, Gali No. 16,<br />
-                            wazirabad village, New Delhi,<br />
+                            Vayro HQ<br />
+                            New Delhi, India<br />
                             110084
                         </p>
                     </div>

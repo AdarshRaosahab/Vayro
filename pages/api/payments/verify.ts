@@ -1,43 +1,81 @@
-import { apiHandler } from '../../../lib/api-wrapper'
-import { verifySignature } from '../../../lib/payments'
-import { AppError, PaymentError } from '../../../lib/errors'
+import { NextApiRequest, NextApiResponse } from 'next'
+import crypto from 'crypto'
 import { db } from '../../../lib/db'
-import { getSession } from '../../../lib/sessions'
 
-export default apiHandler(async (req, res) => {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    console.log(`[Verify] Method: ${req.method}`)
+
     if (req.method !== 'POST') {
-        throw new AppError('Method not allowed', 405)
+        return res.status(405).json({ ok: false, error: 'Method not allowed' })
     }
 
-    const { orderId, paymentId, signature } = req.body
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body
 
-    const isValid = verifySignature(orderId, paymentId, signature)
+        // 1. Validate Input
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            console.error('Missing required payment fields')
+            return res.status(400).json({ ok: false, error: 'Invalid Payment Data' })
+        }
 
-    if (!isValid) {
-        throw new PaymentError('Invalid payment signature')
-    }
+        // 2. Validate Signature
+        const secret = process.env.RAZORPAY_KEY_SECRET
+        if (!secret) {
+            console.error('RAZORPAY_KEY_SECRET is missing')
+            return res.status(500).json({ ok: false, error: 'Server Configuration Error' })
+        }
 
-    // Upgrade user to premium
-    // We need the userId. Ideally, it should be in the session or passed in the body (and verified).
-    // Since this is a protected API route (we should check session), we can get userId from session.
-    const cookieHeader = req.headers.cookie
-    if (cookieHeader) {
-        const cookies: { [key: string]: string } = {}
-        cookieHeader.split(';').forEach((cookie) => {
-            const parts = cookie.split('=')
-            if (parts.length === 2) cookies[parts[0].trim()] = parts[1].trim()
-        })
-        const sessionId = cookies['vayro_session']
-        if (sessionId) {
-            const session = await getSession(sessionId)
-            if (session) {
-                await db.user.update({
-                    where: { id: session.userId },
-                    data: { plan: 'premium' }
+        const generated_signature = crypto
+            .createHmac('sha256', secret)
+            .update(razorpay_order_id + '|' + razorpay_payment_id)
+            .digest('hex')
+
+        if (generated_signature !== razorpay_signature) {
+            console.error('Signature Mismatch')
+            return res.status(400).json({ ok: false, error: 'Payment Verification Failed' })
+        }
+
+        // 3. User Activation (Upgrade to Premium)
+        // Extract session manually to avoid imports
+        const cookieHeader = req.headers.cookie
+        let userId = null
+
+        if (cookieHeader) {
+            const cookies: { [key: string]: string } = {}
+            cookieHeader.split(';').forEach((cookie) => {
+                const parts = cookie.split('=')
+                if (parts.length === 2) cookies[parts[0].trim()] = parts[1].trim()
+            })
+            const sessionId = cookies['vayro_session']
+
+            if (sessionId) {
+                const session = await db.session.findUnique({
+                    where: { id: sessionId },
+                    select: { userId: true, expiresAt: true }
                 })
+
+                if (session && session.expiresAt > new Date()) {
+                    userId = session.userId
+                }
             }
         }
-    }
 
-    res.status(200).json({ ok: true, verified: true })
-})
+        if (userId) {
+            await db.user.update({
+                where: { id: userId },
+                data: { plan: 'premium' }
+            })
+            console.log(`User ${userId} upgraded to premium`)
+        } else {
+            console.warn('Payment verified but NO USER SESSION found to upgrade.')
+            // We still return success because the payment WAS valid. 
+            // The user might need to contact support or we can rely on webhook later.
+        }
+
+        return res.status(200).json({ ok: true, verified: true })
+
+    } catch (error: any) {
+        console.error('Verification Error:', error)
+        return res.status(500).json({ ok: false, error: error.message || 'Internal Server Error' })
+    }
+}

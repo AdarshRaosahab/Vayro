@@ -56,7 +56,7 @@ model AbuseReport {
   ip        String?
   createdAt DateTime @default(now())
 
-  @@unique([linkId, userId])
+  // @@unique([linkId, userId])
 }
 
 model ClickEvent {

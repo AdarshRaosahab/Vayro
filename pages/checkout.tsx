@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import Layout from '../components/Layout'
 import { Card } from '../components/Card'
 import { ButtonPrimary } from '../components/ButtonPrimary'
-import Script from 'next/script'
+// import Script from 'next/script'
 
 declare global {
     interface Window {
@@ -33,9 +33,33 @@ export default function Checkout() {
         }
     }, [router.isReady, router.query])
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script')
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+            script.onload = () => {
+                resolve(true)
+            }
+            script.onerror = () => {
+                resolve(false)
+            }
+            document.body.appendChild(script)
+        })
+    }
+
     const handlePayment = async () => {
         setLoading(true)
         try {
+            // Load Razorpay Script if not present
+            if (!window.Razorpay) {
+                const res = await loadRazorpay()
+                if (!res) {
+                    alert('Razorpay SDK failed to load. Please check your connection.')
+                    setLoading(false)
+                    return
+                }
+            }
+
             // Create Order
             const res = await fetch('/api/secure-pay', {
                 method: 'POST',
@@ -109,7 +133,7 @@ export default function Checkout() {
 
     return (
         <Layout title="Checkout - VAYRO">
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+            {/* Script loaded dynamically in handlePayment */}
             <div className="flex justify-center items-center min-h-[60vh]">
                 <Card className="w-full max-w-md p-8 text-center">
                     <h1 className="text-3xl font-heading font-bold text-deepNavy mb-4">Upgrade to Premium</h1>

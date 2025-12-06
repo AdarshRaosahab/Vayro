@@ -73,15 +73,15 @@ export default apiHandler(async (req, res) => {
         if (!reportsSheet) reportsSheet = await doc.addSheet({ title: 'Reports', headerValues: ['Date', 'Reason', 'Link Code', 'Link Target', 'Reporter', 'Created By'] })
 
         const reports = await db.abuseReport.findMany({
-            include: { link: { include: { user: true } }, user: true },
+            include: { link: { include: { user: true } } }, // Removed user: true (Reporter)
             orderBy: { createdAt: 'desc' }
         })
-        const reportRows = reports.map(r => ({
+        const reportRows = reports.map((r: any) => ({
             Date: r.createdAt.toISOString(),
             Reason: r.reason,
             'Link Code': r.link.code,
             'Link Target': r.link.target,
-            Reporter: r.user?.email || 'Anonymous',
+            Reporter: 'Anonymous (Legacy DB)', // Fixed plain text
             'Created By': r.link.user?.email || 'Anonymous'
         }))
         await reportsSheet.clearRows()

@@ -11,21 +11,21 @@
         "release:check": "node scripts/release-check.js"
     },
     "dependencies": {
+        "@prisma/client": "^5.10.0",
         "bcryptjs": "latest",
         "cookie": "latest",
-        "next": "latest",
+        "next": "^16.0.7",
+        "qrcode": "latest",
+        "razorpay": "latest",
         "react": "latest",
         "react-dom": "latest",
-        "razorpay": "latest",
-        "qrcode": "latest",
-        "recharts": "latest",
-        "@prisma/client": "^5.10.0"
+        "recharts": "latest"
     },
     "devDependencies": {
         "@types/node": "latest",
+        "@types/qrcode": "latest",
         "@types/react": "latest",
         "@types/react-dom": "latest",
-        "@types/qrcode": "latest",
         "@types/recharts": "latest",
         "autoprefixer": "latest",
         "postcss": "latest",

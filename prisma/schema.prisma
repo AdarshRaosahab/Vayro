@@ -21,7 +21,7 @@ model User {
   status           String    @default("ACTIVE") // ACTIVE, SUSPENDED
   links            Link[]
   sessions         Session[]
-  abuseReports     AbuseReport[]
+  // abuseReports     AbuseReport[]
 }
 
 model Session {

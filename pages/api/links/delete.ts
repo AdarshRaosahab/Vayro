@@ -32,7 +32,12 @@ export default apiHandler(async (req, res) => {
     if (!link) throw new NotFoundError('Link not found')
     if (link.userId !== session.userId) throw new AuthError('Not authorized to delete this link')
 
-    await db.link.delete({ where: { id } })
+    // Manual Cascade Delete (Since DB push is blocked by network)
+    await db.$transaction([
+        db.clickEvent.deleteMany({ where: { linkId: id } }),
+        db.abuseReport.deleteMany({ where: { linkId: id } }),
+        db.link.delete({ where: { id } })
+    ])
 
     res.status(200).json({ ok: true })
 })

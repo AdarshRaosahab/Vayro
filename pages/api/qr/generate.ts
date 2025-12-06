@@ -13,7 +13,7 @@ export default apiHandler(async (req, res) => {
         throw new AppError('Missing code', 400)
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://vayro.in'
     const url = `${baseUrl}/${code}`
     const sizeInt = parseInt(size as string, 10) || 512
 

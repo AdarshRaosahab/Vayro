@@ -9,7 +9,7 @@ import { JWT } from 'google-auth-library'
 const clean = (val: any) => (val === null || val === undefined ? '' : String(val))
 
 export default apiHandler(async (req, res) => {
-    if (req.method !== 'POST') {
+    if (req.method !== 'POST' && req.method !== 'GET') {
         throw new AppError('Method not allowed', 405)
     }
 

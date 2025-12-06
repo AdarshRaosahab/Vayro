@@ -2,14 +2,14 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { db } from '../../../lib/db'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { secret } = req.query
+    const { secret, target_email } = req.query
 
     if (secret !== 'vayro-admin-2024') {
         return res.status(403).json({ message: 'Forbidden: Invalid Secret' })
     }
 
     try {
-        const email = 'adarshyadav8368@zohomail.in'
+        const email = (target_email as string) || 'adarshyadav8368@zohomail.in'
 
         // precise update
         const user = await db.user.update({

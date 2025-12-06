@@ -24,47 +24,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(404).json({ message: 'Link not found' })
         }
 
-        // Get User Session
-        const cookieHeader = req.headers.cookie
-        let userId: string | undefined
+        // Simpler Logic due to DB Limitations (userId removed from AbuseReport)
+        // Original logic checked for logged-in user to prevent duplicates.
+        // We removed this because the PROD database doesn't have the column.
 
-        if (cookieHeader) {
-            const cookies: { [key: string]: string } = {}
-            cookieHeader.split(';').forEach((cookie) => {
-                const parts = cookie.split('=')
-                if (parts.length === 2) cookies[parts[0].trim()] = parts[1].trim()
-            })
-            const sessionId = cookies['vayro_session']
-            if (sessionId) {
-                // We need to import getSession or just query db directly since we are in API
-                // Let's query directly to avoid circular deps or just use the session table
-                const session = await prisma.session.findUnique({
-                    where: { id: sessionId },
-                    select: { userId: true, expiresAt: true }
-                })
-                if (session && session.expiresAt > new Date()) {
-                    userId = session.userId
-                }
-            }
-        }
-
-        // Check for duplicate report
-        if (userId) {
-            const existingReport = await prisma.abuseReport.findUnique({
-                where: {
-                    linkId_userId: {
-                        linkId: link.id,
-                        userId: userId
-                    }
-                }
-            })
-            if (existingReport) {
-                return res.status(400).json({ message: 'You have already reported this link.' })
-            }
-        } else {
-            // Optional: Check by IP for anonymous users to prevent spam
-            // For now, we'll just allow it but maybe limit by IP in the future
-        }
+        // Optional: Check by IP for anonymous users to prevent spam
+        // For now, we'll just allow it but maybe limit by IP in the future
 
         // Create abuse report
         await prisma.abuseReport.create({
@@ -72,7 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 linkId: link.id,
                 reason,
                 ip: req.headers['x-forwarded-for'] as string || req.socket.remoteAddress || 'unknown',
-                userId: userId
+                // userId: userId // Field removed from DB schema
             },
         })
 

@@ -1,98 +1,248 @@
-import Head from 'next/head'
-import Link from 'next/link'
-import AnalyticsTable from '../components/AnalyticsTable'
+import { useEffect, useState } from 'react'
+import Layout from '../components/Layout'
+import { Card } from '../components/Card'
+import Table from '../components/Table'
+import { ButtonPrimary } from '../components/ButtonPrimary'
+import { ButtonGhost } from '../components/ButtonGhost'
+import Badge from '../components/Badge'
+import AnalyticsPanel from '../components/AnalyticsPanel'
+import LinkEditModal from '../components/LinkEditModal'
+import ConfirmDeleteModal from '../components/ConfirmDeleteModal'
+import PremiumBadge from '../components/PremiumBadge'
+import UpsellCard from '../components/UpsellCard'
+
+const CopyableLink = ({ code }: { code: string }) => {
+    const [copied, setCopied] = useState(false)
+    // Use window.location.origin if available, otherwise relative
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const fullLink = `${origin}/${code}`
+
+    const handleCopy = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        navigator.clipboard.writeText(fullLink)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+    }
+
+    return (
+        <div className="flex items-center space-x-2 group">
+            <span className="font-semibold text-deepNavy group-hover:text-gold transition-colors">/{code}</span>
+            <button
+                onClick={handleCopy}
+                className="p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-deepNavy transition-colors focus:outline-none"
+                title="Copy Link"
+            >
+                {copied ? (
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                )}
+            </button>
+        </div>
+    )
+}
 
 export default function Dashboard() {
+    const [links, setLinks] = useState<any[]>([])
+    const [selectedLink, setSelectedLink] = useState<any>(null)
+    const [editingLink, setEditingLink] = useState<any>(null)
+    const [deletingLink, setDeletingLink] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState<any>(null)
+
+    useEffect(() => {
+        fetchData()
+    }, [])
+
+    async function fetchData() {
+        try {
+            const authRes = await fetch('/api/auth/me')
+            if (authRes.ok) {
+                const authData = await authRes.json()
+                setUser(authData.user)
+            } else {
+                window.location.href = '/login'
+                return
+            }
+
+            const linksRes = await fetch('/api/links/list')
+            const linksData = await linksRes.json()
+            if (linksData.ok) {
+                setLinks(linksData.links)
+            }
+        } catch (error) {
+            console.error('Failed to fetch data', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    async function handleUpdate(id: string, updates: any) {
+        try {
+            const res = await fetch('/api/links/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ...updates }),
+            })
+            if (res.ok) {
+                setLinks(links.map(l => l.id === id ? { ...l, ...updates } : l))
+            }
+        } catch (error) {
+            console.error('Failed to update link', error)
+        }
+    }
+
+    async function handleDelete(id: string) {
+        try {
+            const res = await fetch('/api/links/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id }),
+            })
+            if (res.ok) {
+                setLinks(links.filter((l) => l.id !== id))
+                if (selectedLink?.id === id) setSelectedLink(null)
+            }
+        } catch (error) {
+            console.error('Failed to delete link', error)
+        }
+    }
+
+    if (loading) return <Layout title="Dashboard">Loading...</Layout>
+
     return (
-        <div className="min-h-screen bg-slate-50 flex font-sans">
-            <Head>
-                <title>Dashboard | Vayro</title>
-            </Head>
-
-            {/* Sidebar */}
-            <aside className="w-64 bg-navy-900 text-white fixed h-full hidden md:flex flex-col border-r border-navy-800">
-                <div className="p-6">
-                    <div className="text-2xl font-heading font-black tracking-tight text-white">
-                        VAYRO<span className="text-gold-500">.</span>
-                    </div>
-                </div>
-                <nav className="flex-1 px-4 py-6 space-y-2">
-                    <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-navy-800 text-gold-400 rounded-lg font-bold">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                        Dashboard
-                    </Link>
-                    <Link href="/links" className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-navy-800/50 rounded-lg transition-colors font-medium">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                        My Links
-                    </Link>
-                    <Link href="/analytics" className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-navy-800/50 rounded-lg transition-colors font-medium">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                        Analytics
-                    </Link>
-                </nav>
-                <div className="p-4 border-t border-navy-800">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gold-500 flex items-center justify-center font-bold text-navy-900">
-                            AD
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-white">Adarsh Y</p>
-                            <p className="text-xs text-slate-400">Pro Plan</p>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main className="flex-1 md:ml-64 p-8">
-                <header className="flex justify-between items-center mb-8">
+        <Layout title="Dashboard" hideFooter={true}>
+            <div className="space-y-8 container mx-auto px-4 py-8">
+                <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-heading font-bold text-navy-900">Dashboard</h1>
-                        <p className="text-slate-500 mt-1">Welcome back, here's what's happening today.</p>
+                        <h1 className="text-3xl font-heading font-bold text-deepNavy flex items-center">
+                            Overview
+                            {user?.plan === 'premium' && <PremiumBadge />}
+                        </h1>
+                        <p className="text-slateGray mt-1">Welcome back, {user?.displayName || user?.email}</p>
                     </div>
-                    <button className="px-6 py-3 bg-navy-900 text-gold-500 font-bold rounded-lg shadow-lg hover:bg-navy-800 transition-all flex items-center gap-2">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                        Create New Link
-                    </button>
-                </header>
+                    <ButtonPrimary onClick={() => window.location.href = '/'}>Create New Link</ButtonPrimary>
+                </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Total Clicks</p>
-                        <p className="text-4xl font-heading font-black text-navy-900">24,592</p>
-                        <p className="text-green-500 text-sm font-bold mt-2 flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                            +12% this week
-                        </p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Links List */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <Card className="overflow-hidden">
+                            <div className="p-6 border-b border-gray-100">
+                                <h2 className="text-xl font-heading font-bold text-deepNavy">Your Links</h2>
+                            </div>
+                            <Table
+                                data={links}
+                                columns={[
+                                    {
+                                        header: 'Original Link',
+                                        accessor: (link: any) => (
+                                            <div className="flex items-center max-w-[200px]" title={link.target}>
+                                                <div className="truncate text-slateGray text-sm">
+                                                    {link.target}
+                                                </div>
+                                                <a
+                                                    href={link.target}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="ml-2 text-slate-300 hover:text-deepNavy flex-shrink-0"
+                                                >
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                </a>
+                                            </div>
+                                        ),
+                                    },
+                                    {
+                                        header: 'Short Link',
+                                        accessor: (link: any) => (
+                                            <div className="cursor-pointer" onClick={() => setSelectedLink(link)}>
+                                                <CopyableLink code={link.code} />
+                                            </div>
+                                        ),
+                                    },
+                                    {
+                                        header: 'Note',
+                                        accessor: (link: any) => (
+                                            <div>
+                                                {link.note ? (
+                                                    <Badge variant="neutral">{link.note}</Badge>
+                                                ) : (
+                                                    <span className="text-slate-300">-</span>
+                                                )}
+                                            </div>
+                                        ),
+                                    },
+                                    {
+                                        header: 'Clicks',
+                                        accessor: (link: any) => <Badge variant="neutral">{link.clicks_count || 0}</Badge>,
+                                    },
+                                    {
+                                        header: 'Actions',
+                                        accessor: (link: any) => (
+                                            <div className="flex space-x-2 items-center">
+                                                <ButtonGhost onClick={() => setSelectedLink(link)}>Stats</ButtonGhost>
+                                                <button
+                                                    className="text-slateGray hover:text-deepNavy"
+                                                    onClick={() => setEditingLink(link)}
+                                                    title="Edit Link"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                </button>
+                                                <button className="text-red-400 hover:text-red-600" onClick={() => setDeletingLink(link)}>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </div>
+                                        ),
+                                    },
+                                ]}
+                            />
+                            {links.length === 0 && (
+                                <div className="p-8 text-center text-slateGray">
+                                    No links yet. Create one to get started!
+                                </div>
+                            )}
+                        </Card>
                     </div>
-                    <div className="p-6 bg-white rounded-xl shadow-sm border border-slate-100">
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">Active Links</p>
-                        <p className="text-4xl font-heading font-black text-navy-900">142</p>
-                        <p className="text-slate-400 text-sm font-bold mt-2">
-                            Across 5 campaigns
-                        </p>
-                    </div>
-                    <div className="p-6 bg-navy-900 rounded-xl shadow-lg border border-navy-800 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                        <p className="text-sm font-bold text-gold-500 uppercase tracking-wider mb-2">Current Plan</p>
-                        <p className="text-4xl font-heading font-black text-white">PRO</p>
-                        <button className="text-white text-sm font-bold mt-2 underline decoration-gold-500 decoration-2 underline-offset-2 hover:text-gold-400 transition-colors">
-                            Manage Billing
-                        </button>
+
+                    {/* Analytics Panel (Side) */}
+                    <div className="lg:col-span-1 space-y-6">
+                        {user?.plan !== 'premium' && user?.role !== 'ADMIN' && <UpsellCard />}
+
+                        {selectedLink ? (
+                            <div className="sticky top-6">
+                                <AnalyticsPanel
+                                    linkId={selectedLink.id}
+                                    onClose={() => setSelectedLink(null)}
+                                    isPremium={user?.plan === 'premium' || user?.role === 'ADMIN'}
+                                />
+                            </div>
+                        ) : (
+                            <Card className="p-8 text-center text-slateGray h-full flex items-center justify-center border-dashed border-2 border-slate-200 bg-transparent shadow-none min-h-[200px]">
+                                <div>
+                                    <p>Select a link to view analytics</p>
+                                </div>
+                            </Card>
+                        )}
                     </div>
                 </div>
 
-                {/* Recent Links Table */}
-                <section>
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-navy-900">Recent Links</h2>
-                        <a href="#" className="text-sm font-bold text-navy-600 hover:text-navy-900">View All</a>
-                    </div>
-                    <AnalyticsTable />
-                </section>
-
-            </main>
-        </div>
+                {/* Modals */}
+                {editingLink && (
+                    <LinkEditModal
+                        link={editingLink}
+                        isPremium={user?.plan === 'premium' || user?.role === 'ADMIN'}
+                        onSave={handleUpdate}
+                        onClose={() => setEditingLink(null)}
+                    />
+                )}
+                {deletingLink && (
+                    <ConfirmDeleteModal
+                        linkId={deletingLink.id}
+                        onDelete={handleDelete}
+                        onClose={() => setDeletingLink(null)}
+                    />
+                )}
+            </div>
+        </Layout>
     )
 }

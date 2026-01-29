@@ -13,8 +13,8 @@ const QuickShorten = () => {
         setShortLink('');
 
         try {
-            // Use local proxy /api/py/v1/shorten -> http://127.0.0.1:8000/api/v1/shorten
-            const response = await fetch('/api/py/v1/shorten', {
+            // Use local Next.js API (Robus with Mock Fallback)
+            const response = await fetch('/api/shorten', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

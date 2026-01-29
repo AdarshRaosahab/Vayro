@@ -25,7 +25,7 @@ export async function getSession(sessionId: string) {
     if (MOCK_SESSIONS[sessionId]) {
         const sess = MOCK_SESSIONS[sessionId];
         if (sess.expires > new Date()) {
-            return { id: sessionId, userId: sess.userId, expiresAt: sess.expires, user: { id: sess.userId, email: 'admin@vayro.in', plan: 'premium' } }
+            return { id: sessionId, userId: sess.userId, expiresAt: sess.expires, user: { id: sess.userId, email: 'admin@vayro.in', plan: 'premium', role: 'ADMIN' } }
         }
     }
 

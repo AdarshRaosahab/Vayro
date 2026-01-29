@@ -27,7 +27,17 @@ export default apiHandler(async (req, res) => {
     const links = await db.link.findMany({
         where: { userId: session.userId },
         orderBy: { createdAt: 'desc' },
+        include: {
+            _count: {
+                select: { clickEvents: true }
+            }
+        }
     })
 
-    res.status(200).json({ ok: true, links })
+    const linksWithCounts = links.map((link: any) => ({
+        ...link,
+        clicks_count: link._count.clickEvents
+    }))
+
+    res.status(200).json({ ok: true, links: linksWithCounts })
 })

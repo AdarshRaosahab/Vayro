@@ -45,10 +45,33 @@ export async function createLink(target: string, userId: string, customAlias?: s
 }
 
 export async function getLinkByCode(code: string) {
-    return db.link.findUnique({
-        where: { code },
-        include: { user: true },
-    })
+    try {
+        const link = await db.link.findUnique({
+            where: { code },
+            include: { user: true },
+        })
+        if (link) return link
+    } catch (e) {
+        console.warn("DB Read failed (getLinkByCode), checking Mock DB")
+    }
+
+    // Fallback to Mock DB
+    const MOCK_DB = (global as any)._MOCK_LINKS || {}
+    const mockData = MOCK_DB[code]
+    if (mockData) {
+        return {
+            id: 'mock-id',
+            code: code,
+            target: mockData.target,
+            userId: null,
+            created: mockData.created || new Date(),
+            clicks: 0,
+            status: 'ACTIVE',
+            user: null
+        } as any // Cast to any to match Prisma Link type partially
+    }
+
+    return null
 }
 
 export async function validateAlias(alias: string) {

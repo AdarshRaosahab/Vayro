@@ -53,6 +53,11 @@ const QuickShorten = () => {
 
     // Helper to format for display: replace domain with vayro.in
     const formatDisplayUrl = (url: string) => {
+        // If it comes back as specific short path (e.g. /abc), prepend domain
+        if (url.startsWith('/')) {
+            return `vayro.in${url}`;
+        }
+
         const clean = url.replace(/^https?:\/\/(www\.)?/, '');
         return clean.replace(/^[^\/]+/, 'vayro.in');
     };

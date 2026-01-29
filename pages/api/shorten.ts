@@ -6,7 +6,7 @@ import { rateLimit } from '../../lib/rateLimit'
 import { urlSafety } from '../../lib/urlSafety'
 import { malwareCheck } from '../../lib/malwareCheck'
 import { fraudPrevention } from '../../lib/fraudPrevention'
-import { randomBytes } from 'crypto'
+import { generateShortCode } from '../../lib/generator'
 import { AppError } from '../../lib/errors'
 
 export default apiHandler(async (req, res) => {
@@ -79,7 +79,7 @@ export default apiHandler(async (req, res) => {
         let retries = 0
         const maxRetries = 5
         while (retries < maxRetries) {
-            code = randomBytes(4).toString('hex')
+            code = generateShortCode(6)
             const existing = await db.link.findUnique({ where: { code } })
             if (!existing) break
             retries++

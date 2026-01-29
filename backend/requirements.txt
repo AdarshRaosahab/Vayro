@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+redis
+asyncpg
+pydantic-settings
+python-dotenv
+slowapi
+pytest
+pytest-asyncio
+httpx
+pytest-mock
+fakeredis

@@ -25,7 +25,23 @@ export async function getSession(sessionId: string) {
     if (MOCK_SESSIONS[sessionId]) {
         const sess = MOCK_SESSIONS[sessionId];
         if (sess.expires > new Date()) {
-            return { id: sessionId, userId: sess.userId, expiresAt: sess.expires, user: { id: sess.userId, email: 'admin@vayro.in', plan: 'premium', role: 'ADMIN' } }
+            return {
+                id: sessionId,
+                userId: sess.userId,
+                expiresAt: sess.expires,
+                user: {
+                    id: sess.userId,
+                    email: 'admin@vayro.in',
+                    plan: 'premium',
+                    role: 'ADMIN',
+                    displayName: 'Admin User',
+                    onboardCompleted: true,
+                    website: null,
+                    status: 'ACTIVE',
+                    createdAt: new Date(),
+                    password: '$2b$10$mockpasswordhash'
+                }
+            }
         }
     }
 

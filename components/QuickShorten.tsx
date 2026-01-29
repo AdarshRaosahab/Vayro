@@ -106,7 +106,10 @@ const QuickShorten = () => {
                         {formatDisplayUrl(shortLink)}
                     </span>
                     <button
-                        onClick={() => navigator.clipboard.writeText(shortLink)}
+                        onClick={() => {
+                            const textToCopy = formatDisplayUrl(shortLink);
+                            navigator.clipboard.writeText(textToCopy);
+                        }}
                         className="text-ivory-200 hover:text-white text-sm font-medium underline decoration-gold-500/50 hover:decoration-gold-500 transition-all whitespace-nowrap"
                     >
                         Copy Link

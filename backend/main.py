@@ -27,19 +27,34 @@ settings = Settings()
 # Global Connections
 redis_client = None
 db_pool = None
+USE_MOCK = False
+mock_db = {"links": {}}
+mock_redis = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    global redis_client, db_pool
+    global redis_client, db_pool, USE_MOCK
     print("Starting up Vayro Redirect Engine...")
-    redis_client = redis.from_url(settings.redis_url, decode_responses=True)
-    db_pool = await asyncpg.create_pool(settings.database_url)
+    try:
+        redis_client = redis.from_url(settings.redis_url, decode_responses=True)
+        await redis_client.ping()
+        print("Connected to Redis.")
+    except Exception as e:
+        print(f"Redis connection failed ({e}). Using Mock Redis.")
+        USE_MOCK = True
+
+    try:
+        if not USE_MOCK:
+            db_pool = await asyncpg.create_pool(settings.database_url)
+            print("Connected to Database.")
+    except Exception as e:
+        print(f"Database connection failed ({e}). Using Mock DB.")
+        USE_MOCK = True
+        
     yield
-    # Shutdown
     print("Shutting down...")
-    await redis_client.close()
-    await db_pool.close()
+    if redis_client: await redis_client.close()
+    if db_pool: await db_pool.close()
 
 app = FastAPI(title="Vayro Redirect Engine", lifespan=lifespan)
 
@@ -66,7 +81,8 @@ def generate_short_code(length=6):
     return result
 
 async def record_analytics(link_id: str, request: Request):
-    """Fire-and-forget analytics to Redis Stream."""
+    """Fire-and-forget analytics."""
+    if USE_MOCK: return 
     try:
         payload = {
             "link_id": link_id,
@@ -81,7 +97,7 @@ async def record_analytics(link_id: str, request: Request):
         print(f"Analytics Error: {e}")
 
 async def check_rate_limit(ip: str):
-    """Sliding window: 100 req/min."""
+    if USE_MOCK: return True
     key = f"rl:{ip}"
     async with redis_client.pipeline(transaction=True) as pipe:
         now = time.time()
@@ -96,58 +112,72 @@ async def check_rate_limit(ip: str):
 @app.post("/api/v1/shorten")
 async def create_short_link(link: LinkCreate):
     original_url = str(link.url)
-    short_code = generate_short_code(6) # 6 chars Base62
+    short_code = generate_short_code(6)
     
-    async with db_pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            INSERT INTO links (short_code, target_url, is_active)
-            VALUES ($1, $2, true)
-            RETURNING id, short_code, target_url
-            """,
-            short_code, original_url
-        )
-        
-    link_id = str(row['id'])
+    link_id = str(random.randint(1000, 9999)) 
+    
+    if USE_MOCK:
+        mock_db["links"][short_code] = {"id": link_id, "target_url": original_url, "is_active": True}
+        print(f"MOCK: Created link {short_code} -> {original_url}")
+    else:
+        async with db_pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                INSERT INTO links (short_code, target_url, is_active)
+                VALUES ($1, $2, true)
+                RETURNING id, short_code, target_url
+                """,
+                short_code, original_url
+            )
+            link_id = str(row['id'])
+
     cache_key = f"url:{short_code}"
     link_data = {"id": link_id, "target": original_url, "active": True}
-    await redis_client.setex(cache_key, 86400, json.dumps(link_data))
+    
+    if not USE_MOCK:
+        await redis_client.setex(cache_key, 86400, json.dumps(link_data))
     
     return {
         "short_code": short_code,
-        "short_url": f"{settings.host_url}/{short_code}", # Backend sends full URL, frontend will format it
+        "short_url": f"{settings.host_url}/{short_code}",
         "original_url": original_url,
         "id": link_id
     }
 
 @app.get("/{short_code}")
-async def redirect_url(short_code: str = Path(..., max_length=50), request: Request):
+async def redirect_url(request: Request, short_code: str = Path(..., max_length=50)):
     if not await check_rate_limit(request.client.host):
         raise HTTPException(status_code=429, detail="Too Many Requests")
 
-    cache_key = f"url:{short_code}"
-    cached_link = await redis_client.get(cache_key)
-
-    if cached_link:
-        link_data = json.loads(cached_link)
+    if USE_MOCK:
+        data = mock_db["links"].get(short_code)
+        if data:
+             link_data = {"id": data["id"], "target": data["target_url"], "active": data["is_active"]}
+        else:
+             link_data = None
     else:
-        async with db_pool.acquire() as conn:
-            row = await conn.fetchrow(
-                "SELECT id, target_url, is_active FROM links WHERE short_code = $1", 
-                short_code
-            )
-            if row:
-                link_data = {"id": str(row["id"]), "target": row["target_url"], "active": row["is_active"]}
-                await redis_client.setex(cache_key, 86400, json.dumps(link_data))
-            else:
-                raise HTTPException(status_code=404, detail="Link not found")
+        cache_key = f"url:{short_code}"
+        cached_link = await redis_client.get(cache_key)
+        if cached_link:
+            link_data = json.loads(cached_link)
+        else:
+            async with db_pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    "SELECT id, target_url, is_active FROM links WHERE short_code = $1", 
+                    short_code
+                )
+                if row:
+                    link_data = {"id": str(row["id"]), "target": row["target_url"], "active": row["is_active"]}
+                    await redis_client.setex(cache_key, 86400, json.dumps(link_data))
+                else:
+                    link_data = None
 
     if not link_data or not link_data.get("active"):
-        raise HTTPException(status_code=404, detail="Link inactive")
+        raise HTTPException(status_code=404, detail="Link not found")
 
     asyncio.create_task(record_analytics(link_data["id"], request))
     return RedirectResponse(url=link_data["target"], status_code=302)
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "mock_mode": USE_MOCK}

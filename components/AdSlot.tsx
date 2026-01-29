@@ -8,10 +8,12 @@ interface AdSlotProps {
 }
 
 export default function AdSlot({ slotId, responsive = true, className = '', style }: AdSlotProps) {
+    const [mounted, setMounted] = useState(false)
     const [showAds, setShowAds] = useState<boolean | null>(null)
     const clientId = "ca-pub-6145288296775657"
 
     useEffect(() => {
+        setMounted(true)
         // Check if we should show ads
         fetch('/api/ads/can-show')
             .then((res) => res.json())
@@ -22,7 +24,7 @@ export default function AdSlot({ slotId, responsive = true, className = '', styl
     }, [])
 
     useEffect(() => {
-        if (showAds && clientId) {
+        if (mounted && showAds && clientId) {
             try {
                 // @ts-ignore
                 (window.adsbygoogle = window.adsbygoogle || []).push({})
@@ -30,8 +32,10 @@ export default function AdSlot({ slotId, responsive = true, className = '', styl
                 console.error('AdSense error:', err)
             }
         }
-    }, [showAds, clientId])
+    }, [mounted, showAds, clientId])
 
+    // Prevent hydration mismatch by returning null on server
+    if (!mounted) return null
     if (showAds === false) return null // Premium user
     if (!clientId) return null // No client ID configured
 
@@ -45,11 +49,6 @@ export default function AdSlot({ slotId, responsive = true, className = '', styl
                 data-ad-format={responsive ? 'auto' : undefined}
                 data-full-width-responsive={responsive ? 'true' : undefined}
             />
-            <script
-                async
-                src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
-                crossOrigin="anonymous"
-            ></script>
         </div>
     )
 }

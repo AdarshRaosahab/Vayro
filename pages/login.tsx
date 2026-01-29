@@ -37,7 +37,7 @@ export default function Login() {
                 const next = router.query.next as string
                 window.location.href = next || '/dashboard'
             } else {
-                alert(data.message || 'Login failed')
+                alert(data.error || data.message || 'Login failed')
             }
         } catch (error) {
             console.error('Login error:', error)

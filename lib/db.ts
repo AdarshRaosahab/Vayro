@@ -10,7 +10,15 @@ export const prisma =
         log: ['query'],
         datasources: {
             db: {
-                url: process.env.DATABASE_URL || 'file:./dev.db', // Fallback to prevent build crash if env is missing
+                url: (() => {
+                    const url = process.env.DATABASE_URL
+                    if (!url) return 'file:./dev.db'
+                    // For Supabase Transaction Pooler (port 6543)
+                    if (url.includes('pooler.supabase.com') && !url.includes('pgbouncer=true')) {
+                        return url.includes('?') ? `${url}&pgbouncer=true` : `${url}?pgbouncer=true`
+                    }
+                    return url
+                })(),
             },
         },
     })

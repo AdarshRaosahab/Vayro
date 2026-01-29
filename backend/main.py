@@ -109,6 +109,10 @@ async def check_rate_limit(ip: str):
         results = await pipe.execute()
         return results[1] <= 100
 
+@app.get("/health")
+async def health():
+    return {"status": "ok", "mock_mode": USE_MOCK}
+
 @app.post("/api/v1/shorten")
 async def create_short_link(link: LinkCreate):
     original_url = str(link.url)
@@ -177,7 +181,3 @@ async def redirect_url(request: Request, short_code: str = Path(..., max_length=
 
     asyncio.create_task(record_analytics(link_data["id"], request))
     return RedirectResponse(url=link_data["target"], status_code=302)
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "mock_mode": USE_MOCK}

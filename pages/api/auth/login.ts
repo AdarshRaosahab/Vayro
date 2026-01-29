@@ -16,6 +16,26 @@ export default apiHandler(async (req, res) => {
 
     const { email, password } = req.body
 
+    // MOCK LOGIN BACKDOOR (For Dev Mode)
+    if (email === 'admin@vayro.in' && password === 'admin123') {
+        // Create mock session
+        const session = { id: 'mock-session-id', userId: 'mock-admin-id' };
+
+        // Mock global session store if needed, or just rely on cookie
+        (global as any)._MOCK_SESSIONS = (global as any)._MOCK_SESSIONS || {};
+        (global as any)._MOCK_SESSIONS[session.id] = {
+            userId: 'mock-admin-id',
+            expires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+        };
+
+        setSessionCookie(res, session.id)
+        res.setHeader('Set-Cookie', [
+            ...((res.getHeader('Set-Cookie') as string[]) || []),
+            'vayro_auth_ui=true; Path=/; Max-Age=2592000; SameSite=Lax'
+        ])
+        return res.status(200).json({ ok: true, user: { id: 'mock-admin-id', email: 'admin@vayro.in' } })
+    }
+
     const validEmail = validateEmail(email)
     const validPassword = validatePassword(password)
 

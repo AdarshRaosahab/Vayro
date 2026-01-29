@@ -23,8 +23,21 @@ const QuickShorten = () => {
             });
 
             if (!response.ok) {
-                const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.detail || 'Failed to shorten link');
+                const contentType = response.headers.get("content-type");
+                let errorMessage = `Error ${response.status}: Failed to shorten`;
+
+                if (contentType && contentType.includes("application/json")) {
+                    const errData = await response.json();
+                    if (Array.isArray(errData.detail)) {
+                        errorMessage = errData.detail.map((e: any) => e.msg).join(', ');
+                    } else if (typeof errData.detail === 'string') {
+                        errorMessage = errData.detail;
+                    }
+                } else {
+                    const text = await response.text();
+                    console.error("Non-JSON Error:", text);
+                }
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
@@ -38,9 +51,10 @@ const QuickShorten = () => {
         }
     };
 
-    // Helper to format for display: remove protocol and www
+    // Helper to format for display: replace domain with vayro.in
     const formatDisplayUrl = (url: string) => {
-        return url.replace(/^https?:\/\/(www\.)?/, '');
+        const clean = url.replace(/^https?:\/\/(www\.)?/, '');
+        return clean.replace(/^[^\/]+/, 'vayro.in');
     };
 
     return (

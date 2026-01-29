@@ -13,7 +13,8 @@ const QuickShorten = () => {
         setShortLink('');
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/shorten', {
+            // Use local proxy /api/py/v1/shorten -> http://127.0.0.1:8000/api/v1/shorten
+            const response = await fetch('/api/py/v1/shorten', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -22,14 +23,16 @@ const QuickShorten = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to shorten link');
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.detail || 'Failed to shorten link');
             }
 
             const data = await response.json();
             // Store full URL for copying, but display cleaner version
             setShortLink(data.short_url);
-        } catch (err) {
-            setError('Something went wrong. Please try again.');
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }

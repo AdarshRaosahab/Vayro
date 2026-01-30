@@ -144,7 +144,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
 
     // Check for caution cookie
     const cookies = req.headers.cookie || ''
-    const cautionAccepted = cookies.includes('vayro_caution_accepted=true')
+    // TEMPORARY: Disabled "Leaving Vayro" warning as requested locally.
+    const cautionAccepted = true; // cookies.includes('vayro_caution_accepted=true')
 
     if (!cautionAccepted) {
         return {

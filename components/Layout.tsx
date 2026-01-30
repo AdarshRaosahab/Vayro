@@ -58,8 +58,6 @@ export default function Layout({ children, title = 'VAYRO', hideFooter = false }
                                 <ul className="space-y-2 text-sm">
                                     <li><Link href="/terms" className="text-slate-400 hover:text-gold transition-colors">Terms of Service</Link></li>
                                     <li><Link href="/privacy" className="text-slate-400 hover:text-gold transition-colors">Privacy Policy</Link></li>
-                                    <li><Link href="/shipping-policy" className="text-slate-400 hover:text-gold transition-colors">Shipping Policy</Link></li>
-                                    <li><Link href="/refund-policy" className="text-slate-400 hover:text-gold transition-colors">Refund Policy</Link></li>
                                 </ul>
                             </div>
                         </div>
